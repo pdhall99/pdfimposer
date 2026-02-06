@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdfimposer"
+dynamic = ["version"]
+description = "Basic imposition for PDF documents"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+keywords = []
+authors = [
+    { name = "PD Hall", email = "20580126+pdhall99@users.noreply.github.com" },
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "pyPDF2"
+]
+
+[project.urls]
+Homepage = "https://github.com/pdhall99/pdfimposer"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+    "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/pdfimposer tests}"
+
+[tool.coverage.run]
+source_pkgs = ["pdfimposer", "tests"]
+branch = true
+parallel = true
+
+[tool.coverage.paths]
+pdfimposer = ["src/pdfimposer", "*/pdfimposer/src/pdfimposer"]
+tests = ["tests", "*/pdfimposer/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "I", "W"]
+ignore = ["D10"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
