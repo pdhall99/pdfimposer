@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "pdfimposer"
@@ -16,15 +16,47 @@ authors = [
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "pyPDF2"
+    "pypdf",
 ]
 
 [project.urls]
 Homepage = "https://github.com/pdhall99/pdfimposer"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/pdfimposer/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pdfimposer"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+
+[tool.hatch.metadata.hooks.vcs]
+
+[tool.hatch.envs.hatch-static-analysis]
+dependencies = ["ruff==0.4.5"]
+
+[tool.hatch.envs.hatch-test]
+dependencies = ["pytest"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.12", "3.13", "3.14"]
+
+[tool.hatch.envs.pre-commit]
+skip-install = true
+dependencies = ["pre-commit"]
+
+[tool.hatch.envs.pre-commit.scripts]
+run = "pre-commit run --all-files {args}"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
@@ -50,12 +82,16 @@ exclude_lines = [
 ]
 
 [tool.ruff]
+target-version = "py312"
 line-length = 88
 src = ["src"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["pdfimposer"]
+
 [tool.ruff.lint]
-select = ["D", "E", "F", "I", "W"]
-ignore = ["D10"]
+select = ["D", "E", "F", "I", "U", "W"]
+ignore = ["D10", "D205"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
