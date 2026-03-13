@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "pdfimposer"
@@ -16,29 +16,87 @@ authors = [
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "pyPDF2"
+    "pypdf",
 ]
 
 [project.urls]
 Homepage = "https://github.com/pdhall99/pdfimposer"
 
+[tool.hatch.build.hooks.vcs]
+version-file = "src/pdfimposer/_version.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pdfimposer"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+local_scheme = "no-local-version"
+
+[tool.hatch.envs.default]
+installer = "uv"
+post-install-commands = ["pre-commit install"]
+dependencies = []
+
+[tool.hatch.envs.hatch-static-analysis]
+config-path = "pyproject.toml"
+dependencies = ["ruff==0.15.6"]
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["pytest-sugar"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.12", "3.13", "3.14"]
+
+[tool.hatch.envs.hatch-test.scripts]
+run = "pytest{env:HATCH_TEST_ARGS:} {args}"
+run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args}"
+cov-combine = "coverage combine"
+cov-report = ["coverage report {args}", "coverage html"]
+cov-report-markdown = "coverage report --format=markdown"
+
+[tool.hatch.envs.pre-commit]
+skip-install = true
+dependencies = ["pre-commit"]
+
+[tool.hatch.envs.pre-commit.scripts]
+run = "pre-commit run --all {args}"
+ci = "pre-commit run --all-files"
+
 [tool.hatch.envs.types]
-extra-dependencies = [
-    "mypy>=1.0.0",
-]
+python = "3.12"
+extra-dependencies = ["mypy[install-types]==1.19.1"]
+
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/pdfimposer tests}"
+check = [
+    "mypy --version",
+    "mypy --config-file=pyproject.toml --install-types --non-interactive {args:.}"
+]
+
+[tool.hatch.metadata.hooks.vcs]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.coverage.run]
-source_pkgs = ["pdfimposer", "tests"]
+source_pkgs = ["src/pdfimposer", "tests"]
+omit = ["_version.py"]
 branch = true
 parallel = true
 
 [tool.coverage.paths]
+# source = ["src/", "*/site-packages/"]
 pdfimposer = ["src/pdfimposer", "*/pdfimposer/src/pdfimposer"]
 tests = ["tests", "*/pdfimposer/tests"]
 
@@ -47,15 +105,50 @@ exclude_lines = [
     "no cov",
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
+    "if 0:",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "if self\\.debug",
+    "^\\s*\\.\\.\\."
 ]
 
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+pretty = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --doctest-glob='*.md'"
+testpaths = ["tests"]
+
 [tool.ruff]
+target-version = "py312"
 line-length = 88
+indent-width = 4
 src = ["src"]
+include = ["src/**/*.py", "src/**/*.pyi", "tests/**/*.py"]
+exclude = ["scripts/*", "_version.py"]
+
+[tool.ruff.format]
+quote-style = "double"
 
 [tool.ruff.lint]
-select = ["D", "E", "F", "I", "W"]
-ignore = ["D10"]
+select = ["D", "E", "F", "I", "UP", "W"]
+ignore = ["D1", "D205", "E203"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+
+[tool.ruff.lint.isort]
+known-first-party = ["pdfimposer"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"scripts/*" = ["T201"]
+"tests/**/*.py" = ["PLR2004", "S101", "TID252"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

@@ -1,13 +1,51 @@
+default_language_version:
+    python: python3.12
+
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: debug-statements
+      - id: check-ast
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: name-tests-test
+        args: [ --pytest-test-first ]
+      - id: trailing-whitespace
+        args: [ --markdown-linebreak-ext=md ]
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.10.9
+    hooks:
+      # Update the uv lockfile
+      - id: uv-lock
+        args: [ --locked ]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version
-    rev: v0.4.5
+    rev: v0.15.6  # keep consistent with hatch config
     hooks:
       # Run the linter
-      - id: ruff
+      - id: ruff-check
         types_or: [ python, pyi, jupyter ]
-        args: [ --fix ]
+        args: [ --fix, --config=pyproject.toml ]
       # Run the formatter
       - id: ruff-format
         types_or: [ python, pyi, jupyter ]
-  
+        args: [ --config=pyproject.toml ]
+
+  - repo: local
+    hooks:
+      - id: types-check
+        name: check types
+        entry: hatch run types:check
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
