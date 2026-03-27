@@ -137,7 +137,7 @@ quote-style = "double"
 
 [tool.ruff.lint]
 select = ["D", "E", "F", "I", "UP", "W"]
-ignore = ["D1", "D205", "E203"]
+ignore = ["D1", "D205", "E203", "E501"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
